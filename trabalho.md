@@ -21,3 +21,8 @@ O código fornecido (`app.js`) possui diversos anti-padrões de desenvolvimento 
 >     - Cobertura de testes unitários
 >     - Cobertura de testes de integração (testes de API)
 > - Fazer um slide explicando as principais intervenções e apresentar a cobertura de testes alcançada
+
+Sugestão de ferramenta:
+- jest
+- supertest
+
