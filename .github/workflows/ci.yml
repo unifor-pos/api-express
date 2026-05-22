@@ -35,6 +35,7 @@ jobs:
         path: coverage/
         
     - name: Comentário de onde está o artefato
+      if: github.event_name == 'pull_request'
       uses: peter-evans/create-or-update-comment@v5
       with:
         issue-number: ${{ github.event.pull_request.number }}
