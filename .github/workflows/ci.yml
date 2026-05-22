@@ -35,5 +35,6 @@ jobs:
     - name: Comentário de onde está o artefato
       uses: peter-evans/create-or-update-comment@v5
       with:
+        issue-number: ${{ github.event.pull_request.number }}
         body: |
           Relatório de coverage: ${{ steps.upload-cov.outputs.artifact-url }}
