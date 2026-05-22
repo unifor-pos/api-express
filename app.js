@@ -3,16 +3,24 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-let usuarios = [
+const initialUsuarios = [
   { id: 1, nome: "João Silva", tipo: "VIP", saldo: 100 },
   { id: 2, nome: "Maria Souza", tipo: "NORMAL", saldo: 50 }
 ];
 
-let pedidos = [
+const initialPedidos = [
   { id: 1, usuarioId: 1, valorFinal: 85.00, status: "APROVADO" },  
   { id: 2, usuarioId: 2, valorFinal: 105.00, status: "APROVADO" }, 
   { id: 3, usuarioId: 99, valorFinal: 30.00, status: "APROVADO" }  
 ];
+
+let usuarios = [...initialUsuarios];
+let pedidos = [...initialPedidos];
+
+app.resetState = () => {
+  usuarios = JSON.parse(JSON.stringify(initialUsuarios));
+  pedidos = JSON.parse(JSON.stringify(initialPedidos));
+};
 
 app.get('/pedidos', (req, res) => {
   res.send(pedidos);
@@ -79,11 +87,15 @@ app.post('/pedidos', async (req, res) => {
 app.get('/pedidos/:id', (req, res) => {
   const pedido = pedidos.find(p => p.id == req.params.id);
   
+  if (!pedido) {
+    return res.status(404).json({ erro: "Pedido não encontrado" });
+  }
+
   const donoPedido = usuarios.find(u => u.id === pedido.usuarioId); 
 
   res.json({
     pedido,
-    cliente: donoPedido.nome
+    cliente: donoPedido ? donoPedido.nome : "Desconhecido"
   });
 });
 
