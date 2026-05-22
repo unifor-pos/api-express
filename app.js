@@ -1,23 +1,17 @@
 const express = require('express');
 const viacepClient = require('./src/clients/viacep.client');
 const precificacao = require('./src/services/precificacao.service');
+const { createUsuariosRepository } = require('./src/repositories/usuarios.repository');
+const { createPedidosRepository } = require('./src/repositories/pedidos.repository');
 const app = express();
 app.use(express.json());
 
-let usuarios = [
-  { id: 1, nome: "João Silva", tipo: "VIP", saldo: 100 },
-  { id: 2, nome: "Maria Souza", tipo: "NORMAL", saldo: 50 }
-];
-
-let pedidos = [
-  { id: 1, usuarioId: 1, valorFinal: 85.00, status: "APROVADO" },  
-  { id: 2, usuarioId: 2, valorFinal: 105.00, status: "APROVADO" }, 
-  { id: 3, usuarioId: 99, valorFinal: 30.00, status: "APROVADO" }  
-];
+const usuariosRepo = createUsuariosRepository();
+const pedidosRepo = createPedidosRepository();
 
 app.get('/pedidos', (req, res) => {
-  res.send(pedidos);
-})
+  res.send(pedidosRepo.listarTodos());
+});
 
 app.post('/pedidos', async (req, res) => {
   const { usuarioId, valorTotal, cepDestino } = req.body;
@@ -26,7 +20,7 @@ app.post('/pedidos', async (req, res) => {
     return res.status(400).json({ erro: "Dados inválidos" });
   }
 
-  const usuario = usuarios.find(u => u.id === usuarioId);
+  const usuario = usuariosRepo.buscarPorId(usuarioId);
   if (!usuario) {
     return res.status(404).json({ erro: "Usuário não encontrado" });
   }
@@ -50,23 +44,20 @@ app.post('/pedidos', async (req, res) => {
     return res.status(400).json({ erro: "Saldo insuficiente" });
   }
 
-  usuario.saldo -= valorFinal;
+  usuariosRepo.debitarSaldo(usuario.id, valorFinal);
 
-  const novoPedido = {
-    id: pedidos.length + 1,
+  const novoPedido = pedidosRepo.salvar({
     usuarioId,
     valorFinal,
-    status: "APROVADO"
-  };
-  pedidos.push(novoPedido);
+    status: 'APROVADO'
+  });
 
   return res.status(201).json(novoPedido);
 });
 
 app.get('/pedidos/:id', (req, res) => {
-  const pedido = pedidos.find(p => p.id == req.params.id);
-  
-  const donoPedido = usuarios.find(u => u.id === pedido.usuarioId); 
+  const pedido = pedidosRepo.buscarPorId(req.params.id);
+  const donoPedido = usuariosRepo.buscarPorId(pedido.usuarioId);
 
   res.json({
     pedido,
