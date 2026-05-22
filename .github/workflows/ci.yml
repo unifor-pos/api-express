@@ -28,6 +28,7 @@ jobs:
       run: npm test -- --coverage
 
     - name: Upload de cov report
+      if: github.event_name == 'pull_request'
       id: upload-cov
       uses: actions/upload-artifact@v7
       with:
