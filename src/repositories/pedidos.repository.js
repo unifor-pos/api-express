@@ -3,10 +3,9 @@
  *
  * Implementação atual: em memória.
  *
- * NOTA: o método `salvar` ainda usa `pedidos.length + 1` para o ID,
- * preservando intencionalmente o bug de race condition do app.js
- * original. A correção (gerador atômico) é aplicada em commit
- * subsequente, junto com a virada do characterization test [BUG].
+ * Geração de ID: contador atômico via closure (`nextId++`). Substitui o
+ * `pedidos.length + 1` do app.js original, que sob duas requisições
+ * concorrentes podia ler o mesmo length e emitir IDs duplicados.
  */
 
 const SEED_PEDIDOS = Object.freeze([
@@ -17,6 +16,7 @@ const SEED_PEDIDOS = Object.freeze([
 
 function createPedidosRepository(seed = SEED_PEDIDOS) {
   const pedidos = seed.map(p => ({ ...p }));
+  let nextId = pedidos.reduce((max, p) => Math.max(max, p.id), 0) + 1;
 
   return {
     listarTodos() {
@@ -26,7 +26,7 @@ function createPedidosRepository(seed = SEED_PEDIDOS) {
       return pedidos.find(p => p.id == id); // == intencional, igual ao app.js original
     },
     salvar(pedido) {
-      const novoPedido = { id: pedidos.length + 1, ...pedido };
+      const novoPedido = { id: nextId++, ...pedido };
       pedidos.push(novoPedido);
       return novoPedido;
     }

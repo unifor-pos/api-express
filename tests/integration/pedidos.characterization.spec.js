@@ -163,9 +163,9 @@ describe('POST /pedidos — bugs de regra de negócio', () => {
     expect(res.body.valorFinal).toBeLessThan(0);
   });
 
-  it('[BUG] race condition: 2 POSTs concorrentes podem gerar IDs duplicados', async () => {
-    // `id: pedidos.length + 1` é lido antes do push -> duas requisições
-    // simultâneas leem o mesmo length e geram o mesmo id.
+  it('gerador atômico garante IDs únicos sob 2 POSTs concorrentes', async () => {
+    // Fix: contador via closure no pedidos.repository (nextId++).
+    // Antes do fix, `id: pedidos.length + 1` podia colidir em concorrência.
     nock(VIACEP_HOST).persist().get('/ws/01001000/json/').reply(200, { uf: 'SP' });
 
     const [r1, r2] = await Promise.all([
@@ -175,9 +175,7 @@ describe('POST /pedidos — bugs de regra de negócio', () => {
 
     expect(r1.status).toBe(201);
     expect(r2.status).toBe(201);
-    // No estado atual, IDs podem colidir. Documentamos a possibilidade.
-    // Após o fix (gerador atômico) este teste vira "IDs sempre únicos".
-    expect(r1.body.id === r2.body.id || r1.body.id !== r2.body.id).toBe(true);
+    expect(r1.body.id).not.toBe(r2.body.id);
   });
 });
 
