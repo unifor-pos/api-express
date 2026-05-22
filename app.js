@@ -5,13 +5,14 @@ app.use(express.json());
 
 const initialUsuarios = [
   { id: 1, nome: "João Silva", tipo: "VIP", saldo: 100 },
-  { id: 2, nome: "Maria Souza", tipo: "NORMAL", saldo: 50 }
+  { id: 2, nome: "Maria Souza", tipo: "NORMAL", saldo: 50 },
+  { id: 3, nome: "Ana Santos", tipo: "VIP", saldo: 10 }
 ];
 
 const initialPedidos = [
-  { id: 1, usuarioId: 1, valorFinal: 85.00, status: "APROVADO" },  
-  { id: 2, usuarioId: 2, valorFinal: 105.00, status: "APROVADO" }, 
-  { id: 3, usuarioId: 99, valorFinal: 30.00, status: "APROVADO" }  
+  { id: 1, usuarioId: 1, valorFinal: 85.00, status: "APROVADO" },
+  { id: 2, usuarioId: 2, valorFinal: 105.00, status: "APROVADO" },
+  { id: 3, usuarioId: 99, valorFinal: 30.00, status: "APROVADO" }
 ];
 
 let usuarios = [...initialUsuarios];
@@ -40,27 +41,27 @@ app.post('/pedidos', async (req, res) => {
 
   let valorFinal = valorTotal;
   if (usuario.tipo === "VIP") {
-    valorFinal = valorTotal * 0.90; 
-    valorFinal = valorFinal - 50; 
+    valorFinal = valorTotal * 0.90;
+    valorFinal = valorFinal - 50;
   }
 
-  
+
   try {
     const response = await axios.get(`https://viacep.com.br/ws/${cepDestino}/json/`);
-    
+
     if (response.data.erro) {
       return res.status(400).json({ erro: "CEP inválido" });
     }
 
     let frete = 20;
     if (response.data.uf === "SP") {
-      frete = 5; 
+      frete = 5;
     }
 
     if (response.data.uf === "CE") {
-      frete = 40; 
+      frete = 40;
     }
-    
+
     valorFinal += frete;
 
   } catch (error) {
@@ -86,12 +87,12 @@ app.post('/pedidos', async (req, res) => {
 
 app.get('/pedidos/:id', (req, res) => {
   const pedido = pedidos.find(p => p.id == req.params.id);
-  
+
   if (!pedido) {
     return res.status(404).json({ erro: "Pedido não encontrado" });
   }
 
-  const donoPedido = usuarios.find(u => u.id === pedido.usuarioId); 
+  const donoPedido = usuarios.find(u => u.id === pedido.usuarioId);
 
   res.json({
     pedido,
