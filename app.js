@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios');
+const viacepClient = require('./src/clients/viacep.client');
 const app = express();
 app.use(express.json());
 
@@ -38,21 +38,21 @@ app.post('/pedidos', async (req, res) => {
 
   
   try {
-    const response = await axios.get(`https://viacep.com.br/ws/${cepDestino}/json/`);
-    
-    if (response.data.erro) {
+    const enderecoCep = await viacepClient.consultarCep(cepDestino);
+
+    if (enderecoCep.erro) {
       return res.status(400).json({ erro: "CEP inválido" });
     }
 
     let frete = 20;
-    if (response.data.uf === "SP") {
-      frete = 5; 
+    if (enderecoCep.uf === "SP") {
+      frete = 5;
     }
 
-    if (response.data.uf === "CE") {
-      frete = 40; 
+    if (enderecoCep.uf === "CE") {
+      frete = 40;
     }
-    
+
     valorFinal += frete;
 
   } catch (error) {
