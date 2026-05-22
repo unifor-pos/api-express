@@ -4,3 +4,4 @@ Autores do trabalho:
 - Williame
 - Jefferson
 - Otoni
+- Janderson
