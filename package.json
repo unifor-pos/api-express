@@ -1,6 +1,33 @@
 {
+  "name": "api-express",
+  "version": "1.0.0",
+  "description": "API Express de pedidos — trabalho prático da disciplina Testes Automatizados e Contínuos (Pós DevOps, Unifor)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "express",
+    "jest",
+    "supertest",
+    "nock",
+    "testes-automatizados",
+    "shift-left",
+    "ci-cd"
+  ],
+  "author": "Alexandre Morlin",
+  "license": "MIT",
   "dependencies": {
     "axios": "^1.16.1",
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nock": "^13.5.4",
+    "supertest": "^7.0.0"
   }
 }
