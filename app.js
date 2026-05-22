@@ -1,90 +1,29 @@
 const express = require('express');
-const axios = require('axios');
+
+const UsuarioRepositoryInMemory = require('./src/infrastructure/repositories/UsuarioRepositoryInMemory');
+const PedidoRepositoryInMemory = require('./src/infrastructure/repositories/PedidoRepositoryInMemory');
+const CepService = require('./src/infrastructure/services/CepService');
+const FreteCalculator = require('./src/domain/services/FreteCalculator');
+const CriarPedidoUseCase = require('./src/application/usecases/CriarPedidoUseCase');
+const ListarPedidosUseCase = require('./src/application/usecases/ListarPedidosUseCase');
+const BuscarPedidoUseCase = require('./src/application/usecases/BuscarPedidoUseCase');
+const PedidosController = require('./src/presentation/controllers/PedidosController');
+const pedidosRoutes = require('./src/presentation/routes/pedidosRoutes');
+
 const app = express();
 app.use(express.json());
 
-let usuarios = [
-  { id: 1, nome: "João Silva", tipo: "VIP", saldo: 100 },
-  { id: 2, nome: "Maria Souza", tipo: "NORMAL", saldo: 50 }
-];
+const usuarioRepository = new UsuarioRepositoryInMemory();
+const pedidoRepository = new PedidoRepositoryInMemory();
+const cepService = new CepService();
+const freteCalculator = new FreteCalculator();
 
-let pedidos = [
-  { id: 1, usuarioId: 1, valorFinal: 85.00, status: "APROVADO" },  
-  { id: 2, usuarioId: 2, valorFinal: 105.00, status: "APROVADO" }, 
-  { id: 3, usuarioId: 99, valorFinal: 30.00, status: "APROVADO" }  
-];
+const criarPedidoUseCase = new CriarPedidoUseCase({ usuarioRepository, pedidoRepository, cepService, freteCalculator });
+const listarPedidosUseCase = new ListarPedidosUseCase({ pedidoRepository });
+const buscarPedidoUseCase = new BuscarPedidoUseCase({ pedidoRepository, usuarioRepository });
 
-app.get('/pedidos', (req, res) => {
-  res.send(pedidos);
-})
+const pedidosController = new PedidosController({ listarPedidosUseCase, buscarPedidoUseCase, criarPedidoUseCase });
 
-app.post('/pedidos', async (req, res) => {
-  const { usuarioId, valorTotal, cepDestino } = req.body;
-
-  if (!usuarioId || !valorTotal) {
-    return res.status(400).json({ erro: "Dados inválidos" });
-  }
-
-  const usuario = usuarios.find(u => u.id === usuarioId);
-  if (!usuario) {
-    return res.status(404).json({ erro: "Usuário não encontrado" });
-  }
-
-  let valorFinal = valorTotal;
-  if (usuario.tipo === "VIP") {
-    valorFinal = valorTotal * 0.90; 
-    valorFinal = valorFinal - 50; 
-  }
-
-  
-  try {
-    const response = await axios.get(`https://viacep.com.br/ws/${cepDestino}/json/`);
-    
-    if (response.data.erro) {
-      return res.status(400).json({ erro: "CEP inválido" });
-    }
-
-    let frete = 20;
-    if (response.data.uf === "SP") {
-      frete = 5; 
-    }
-
-    if (response.data.uf === "CE") {
-      frete = 40; 
-    }
-    
-    valorFinal += frete;
-
-  } catch (error) {
-    return res.status(500).json({ erro: "Erro ao calcular frete externo" });
-  }
-
-  if (usuario.saldo < valorFinal) {
-    return res.status(400).json({ erro: "Saldo insuficiente" });
-  }
-
-  usuario.saldo -= valorFinal;
-
-  const novoPedido = {
-    id: pedidos.length + 1,
-    usuarioId,
-    valorFinal,
-    status: "APROVADO"
-  };
-  pedidos.push(novoPedido);
-
-  return res.status(201).json(novoPedido);
-});
-
-app.get('/pedidos/:id', (req, res) => {
-  const pedido = pedidos.find(p => p.id == req.params.id);
-  
-  const donoPedido = usuarios.find(u => u.id === pedido.usuarioId); 
-
-  res.json({
-    pedido,
-    cliente: donoPedido.nome
-  });
-});
+app.use('/pedidos', pedidosRoutes(pedidosController));
 
 module.exports = app;
