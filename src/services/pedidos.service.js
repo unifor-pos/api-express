@@ -62,7 +62,7 @@ function criarPedidosService({ usuariosRepo, pedidosRepo, viacepClient, precific
 
     return {
       pedido,
-      cliente: donoPedido.nome
+      cliente: donoPedido ? donoPedido.nome : null
     };
   }
 

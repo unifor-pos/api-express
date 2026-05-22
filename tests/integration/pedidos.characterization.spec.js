@@ -57,11 +57,15 @@ describe('GET /pedidos/:id', () => {
     });
   });
 
-  it('[BUG] lança 500 quando o pedido referencia usuário inexistente (usuarioId=99)', async () => {
+  it('retorna 200 com cliente null quando o pedido referencia usuário inexistente', async () => {
     // Pedido 3 do seed aponta para usuarioId=99 que não está em `usuarios`.
-    // O código acessa `donoPedido.nome` sem checagem -> TypeError.
+    // Fix: service faz null-check em donoPedido e degrada graciosamente.
     const res = await request(app).get('/pedidos/3');
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      pedido: { id: 3, usuarioId: 99, valorFinal: 30, status: 'APROVADO' },
+      cliente: null
+    });
   });
 
   it('[BUG] lança 500 quando o pedido NÃO existe (em vez de 404)', async () => {
