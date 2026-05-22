@@ -26,7 +26,14 @@ jobs:
       run: npm test -- --coverage
 
     - name: Upload de cov report
+      id: upload-cov
       uses: actions/upload-artifact@v7
       with:
         name: cov-report
         path: coverage/
+        
+    - name: Comentário de onde está o artefato
+      uses: peter-evans/create-or-update-comment@v5
+      with:
+        body: |
+          Relatório de coverage: ${{ steps.upload-cov.outputs.artifact-url }}
