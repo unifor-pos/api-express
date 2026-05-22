@@ -24,3 +24,9 @@ jobs:
 
     - name: Executar os Testes Automatizados
       run: npm test -- --coverage
+
+    - name: Upload de cov report
+      uses: actions/upload-artifact@v7
+      with:
+        name: cov-report
+        path: coverage/
