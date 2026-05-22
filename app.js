@@ -1,5 +1,6 @@
 const express = require('express');
 const viacepClient = require('./src/clients/viacep.client');
+const precificacao = require('./src/services/precificacao.service');
 const app = express();
 app.use(express.json());
 
@@ -30,13 +31,8 @@ app.post('/pedidos', async (req, res) => {
     return res.status(404).json({ erro: "Usuário não encontrado" });
   }
 
-  let valorFinal = valorTotal;
-  if (usuario.tipo === "VIP") {
-    valorFinal = valorTotal * 0.90; 
-    valorFinal = valorFinal - 50; 
-  }
+  let valorFinal = precificacao.aplicarDescontoVIP(valorTotal, usuario.tipo);
 
-  
   try {
     const enderecoCep = await viacepClient.consultarCep(cepDestino);
 
@@ -44,16 +40,7 @@ app.post('/pedidos', async (req, res) => {
       return res.status(400).json({ erro: "CEP inválido" });
     }
 
-    let frete = 20;
-    if (enderecoCep.uf === "SP") {
-      frete = 5;
-    }
-
-    if (enderecoCep.uf === "CE") {
-      frete = 40;
-    }
-
-    valorFinal += frete;
+    valorFinal += precificacao.calcularFrete(enderecoCep.uf);
 
   } catch (error) {
     return res.status(500).json({ erro: "Erro ao calcular frete externo" });
