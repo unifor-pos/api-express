@@ -14,6 +14,18 @@ npx nodemon
 
 Pronto, API rodando em <http://localhost:3000>
 
+### Estrutura
+```txt
+src/
+  clients/
+  controllers/
+  data/
+  middlewares/
+  repositories/
+  routes/
+  services/
+```
+
 ### Endpoints
 - `GET /pedidos` (listar os pedidos)
 - `GET /pedidos/:id` (buscar dados de um pedido)
