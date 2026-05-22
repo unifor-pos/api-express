@@ -68,10 +68,11 @@ describe('GET /pedidos/:id', () => {
     });
   });
 
-  it('[BUG] lança 500 quando o pedido NÃO existe (em vez de 404)', async () => {
-    // `pedidos.find(...)` retorna undefined e o código acessa `pedido.usuarioId`.
+  it('retorna 404 quando o pedido não existe', async () => {
+    // Fix: service lança AppError(404) e errorHandler central traduz.
     const res = await request(app).get('/pedidos/999');
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ erro: 'Pedido não encontrado' });
   });
 });
 

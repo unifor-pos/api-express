@@ -13,7 +13,11 @@
  *   - cada caminho de retorno produz um objeto `Result` discriminado
  *     por `ok` (sucesso) ou `erro` (mensagem + statusCode), mantendo o
  *     controller HTTP livre de regra de negócio
+ *   - caminhos de erro pontuais em handlers síncronos usam `AppError`,
+ *     traduzido pelo errorHandler central (ver `src/middlewares/errorHandler.js`)
  */
+
+const { AppError } = require('../errors/AppError');
 
 function criarPedidosService({ usuariosRepo, pedidosRepo, viacepClient, precificacao }) {
   async function criar({ usuarioId, valorTotal, cepDestino }) {
@@ -58,6 +62,9 @@ function criarPedidosService({ usuariosRepo, pedidosRepo, viacepClient, precific
 
   function buscarPorIdComCliente(id) {
     const pedido = pedidosRepo.buscarPorId(id);
+    if (!pedido) {
+      throw new AppError('Pedido não encontrado', 404);
+    }
     const donoPedido = usuariosRepo.buscarPorId(pedido.usuarioId);
 
     return {
