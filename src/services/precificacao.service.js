@@ -5,10 +5,6 @@
  *   - viram trivialmente testáveis (unit tests rápidos, sem mocks)
  *   - podem evoluir sem tocar no controller
  *   - documentam as regras de negócio em um lugar único
- *
- * NOTA: mantém o comportamento atual do app.js (inclusive os bugs de
- * regra de negócio identificados). Os fixes serão feitos em commits
- * subsequentes, separados da refatoração estrutural.
  */
 
 const TIPO_USUARIO = Object.freeze({
@@ -27,18 +23,18 @@ const DESCONTO_VIP_FIXO = 50;
 
 /**
  * Aplica desconto VIP sobre o valor total quando o usuário é VIP.
- * Comportamento atual: valor * 0.9 - 50 (pode resultar em valor negativo).
+ * Regra: valor * (1 - 10%) - 50, com piso em 0 para evitar subtotal negativo.
  *
  * @param {number} valorTotal
  * @param {string} tipoUsuario
- * @returns {number} valor após desconto
+ * @returns {number} valor após desconto (>= 0)
  */
 function aplicarDescontoVIP(valorTotal, tipoUsuario) {
   if (tipoUsuario !== TIPO_USUARIO.VIP) {
     return valorTotal;
   }
   const valorComPercentual = valorTotal * (1 - DESCONTO_VIP_PERCENTUAL);
-  return valorComPercentual - DESCONTO_VIP_FIXO;
+  return Math.max(0, valorComPercentual - DESCONTO_VIP_FIXO);
 }
 
 /**

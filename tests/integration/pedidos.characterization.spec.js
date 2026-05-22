@@ -155,9 +155,9 @@ describe('POST /pedidos — cálculo de frete por UF', () => {
 });
 
 describe('POST /pedidos — bugs de regra de negócio', () => {
-  it('[BUG] cliente VIP com valorTotal baixo gera valorFinal NEGATIVO', async () => {
-    // Regra atual: 10 * 0.9 = 9, 9 - 50 = -41, -41 + 5 (SP) = -36.
-    // Saldo é DESCONTADO desse negativo (ou seja, AUMENTA), o que é claramente um bug.
+  it('cliente VIP com valorTotal baixo nunca gera subtotal negativo (piso = 0)', async () => {
+    // Fix: aplicarDescontoVIP usa Math.max(0, valor*0.9 - 50).
+    // 10 -> max(0, -41) = 0; soma frete SP = 5. valorFinal = 5.
     nock(VIACEP_HOST).get('/ws/01001000/json/').reply(200, { uf: 'SP' });
 
     const res = await request(app)
@@ -165,7 +165,7 @@ describe('POST /pedidos — bugs de regra de negócio', () => {
       .send({ usuarioId: 1, valorTotal: 10, cepDestino: '01001000' });
 
     expect(res.status).toBe(201);
-    expect(res.body.valorFinal).toBeLessThan(0);
+    expect(res.body.valorFinal).toBe(5);
   });
 
   it('gerador atômico garante IDs únicos sob 2 POSTs concorrentes', async () => {
