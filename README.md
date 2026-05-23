@@ -1,5 +1,8 @@
 # API Express
 
+
+[![codecov](https://codecov.io/gh/estudos-unifor-eng-devops/api-express/graph/badge.svg?token=AUJO62PMIG)](https://codecov.io/gh/estudos-unifor-eng-devops/api-express)
+
 ### Como rodar
 
 1. Instale os pacotes
