@@ -1,6 +1,7 @@
 # API Express
 
 [![CI](https://github.com/unifor-devops/api-express/actions/workflows/ci.yml/badge.svg)](https://github.com/unifor-devops/api-express/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/unifor-devops/api-express/branch/main/graph/badge.svg)](https://codecov.io/gh/unifor-devops/api-express)
 
 API HTTP de pedidos em Node.js + Express, usada como caso de estudo do
 trabalho prático da disciplina **Testes Automatizados e Contínuos** da
